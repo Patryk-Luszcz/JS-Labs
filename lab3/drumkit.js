@@ -3,9 +3,15 @@ const playBtns = [...document.querySelectorAll('.play')];
 const checkboxes = [...document.querySelectorAll('.checkbox')];
 const playAllBtn = document.querySelector('.playAll');
 const playSelectedBtn = document.querySelector('.playSelected');
+const metronomeInput = document.querySelector('#metronomeInput');
+const metronomeBtn = document.querySelector('#metronomeBtn');
 
 let isRecording = false;
 const channels = new Array(4).fill().map(() => ({ endTime: 0, soundTrack: [], checked: false }));
+
+let intervalId;
+let beatsPerMinute = null;
+let isMetronomePlaying = false;
 
 const KeyToSound = {
 	a: '#s1',
@@ -83,6 +89,21 @@ const playTrack = (playBtn, channel) => {
 
 const checkChannel = (channel) => (channel.checked = !channel.checked);
 
+const playMetronomeBeat = () => playSound(KeyToSound['f']);
+
+const toggleMetronome = () => {
+	if (isMetronomePlaying) {
+		clearInterval(intervalId);
+
+		isMetronomePlaying = false;
+	} else if (beatsPerMinute) {
+		isMetronomePlaying = true;
+		const intervalDuration = 60000 / beatsPerMinute;
+
+		intervalId = setInterval(playMetronomeBeat, intervalDuration);
+	}
+};
+
 recordBtns.forEach((recordBtn, index) => {
 	recordBtn.addEventListener('click', () => recordTrack(channels[index], recordBtn));
 });
@@ -98,3 +119,6 @@ playAllBtn.addEventListener('click', () => channels.forEach((channel) => playTra
 playSelectedBtn.addEventListener('click', () =>
 	channels.forEach((channel) => channel.checked && playTrack(playSelectedBtn, channel))
 );
+
+metronomeInput.addEventListener('input', (e) => (beatsPerMinute = +e.target.value));
+metronomeBtn.addEventListener('click', toggleMetronome);
