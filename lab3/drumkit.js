@@ -47,9 +47,6 @@ const recordTrack = (channel, recordBtn) => {
 
 	if (isRecording) {
 		channel.soundTrack = [];
-	}
-
-	if (isRecording) {
 		document.addEventListener('keypress', onKeyPress(channel));
 
 		channel.stopRecording = () => {
