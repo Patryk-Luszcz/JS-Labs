@@ -1,19 +1,21 @@
-const addNoteBtn = document.querySelector('.add');
-const save = document.querySelector('.save');
-const cancel = document.querySelector('.cancel');
-const popup = document.querySelector('.popup');
-const selectColor = document.querySelector('.select-color');
-const description = document.querySelector('.description');
-const error = document.querySelector('.error');
-const noteArea = document.querySelector('.note-area');
-const inputTitle = document.querySelector('.input-title');
-const popupTitle = document.querySelector('.add-note-title');
+// Selectors
+const elements = {
+	addNoteBtn: document.querySelector('.add'),
+	saveBtn: document.querySelector('.save'),
+	cancelBtn: document.querySelector('.cancel'),
+	popup: document.querySelector('.popup'),
+	selectColor: document.querySelector('.select-color'),
+	description: document.querySelector('.description'),
+	error: document.querySelector('.error'),
+	noteArea: document.querySelector('.note-area'),
+	inputTitle: document.querySelector('.input-title'),
+	popupTitle: document.querySelector('.add-note-title'),
+	checkbox: document.querySelector('.checkbox'),
+};
 
 let isEditingMode = false;
-let selectedColor;
+let editingNoteId;
 let notes = JSON.parse(localStorage.getItem('notes')) || [];
-
-let editingNote;
 
 const colors = {
 	blue: 'rgb(0, 170, 255)',
@@ -23,138 +25,142 @@ const colors = {
 	purple: 'rgb(184, 7, 184)',
 };
 
-const openPopup = () => {
-	popup.style.display = 'block';
-	popup.classList.toggle('popup-animation');
-};
+// Event Listeners
+elements.addNoteBtn.addEventListener('click', () => openPopup('Add Note'));
+elements.cancelBtn.addEventListener('click', closePopup);
+elements.saveBtn.addEventListener('click', saveNote);
 
-const closePopup = () => {
-	popup.style.display = 'none';
-	popup.classList.toggle('popup-animation');
-	selectColor.selectedIndex = '0';
-	inputTitle.value = '';
-	description.value = '';
+// Popup Functions
+function openPopup(title) {
+	elements.popup.style.display = 'block';
+	elements.popup.classList.add('popup-animation');
+	elements.popupTitle.textContent = title;
+
+	resetPopupFields();
+}
+
+function closePopup() {
+	elements.popup.style.display = 'none';
+	elements.popup.classList.remove('popup-animation');
+
+	resetPopupFields();
+}
+
+function resetPopupFields() {
+	elements.selectColor.selectedIndex = 0;
+	elements.inputTitle.value = '';
+	elements.description.value = '';
+	elements.checkbox.checked = false;
 	isEditingMode = false;
-};
+}
 
-const addNote = () => {
-	popupTitle.textContent = 'Add Note';
-	openPopup();
-};
+// Note Operations
+function saveNote() {
+	const title = elements.inputTitle.value.trim();
+	const description = elements.description.value.trim();
+	const color = elements.selectColor.value;
+	const isPinned = elements.checkbox.checked;
 
-const selectValue = () => {
-	const { options, selectedIndex } = selectColor;
-
-	selectedColor = options[selectedIndex].text.toLowerCase();
-};
-
-const saveNote = () => {
-	const { options, selectedIndex } = selectColor;
-
-	if (options[selectedIndex].value !== '0' && description.value !== '') {
+	if (title && color !== '0' && description) {
 		if (isEditingMode) {
-			const updatedNote = {
-				...editingNote,
-				title: inputTitle.value,
-				description: description.value,
-				color: selectedColor ?? selectColor.value,
-			};
-
-			const editingNoteHtml = document.getElementById(updatedNote.id);
-
-			const noteTitle = editingNoteHtml.querySelector('.note-title');
-			const noteBody = editingNoteHtml.querySelector('.note-body');
-
-			editingNoteHtml.style.backgroundColor = colors[updatedNote.color];
-			noteTitle.textContent = updatedNote.title;
-			noteBody.textContent = updatedNote.description;
-
-			const index = notes.findIndex((note) => note.id === updatedNote.id);
-			notes[index] = updatedNote;
-
-			localStorage.setItem('notes', JSON.stringify(notes));
+			updateNote(title, description, color, isPinned);
 		} else {
-			createNote();
+			addNewNote(title, description, color, isPinned);
 		}
-		error.style.visibility = 'hidden';
+		elements.error.style.visibility = 'hidden';
+		closePopup();
 	} else {
-		error.style.visibility = 'visible';
+		elements.error.style.visibility = 'visible';
 	}
-};
+}
 
-const createNote = () => {
-	const noteData = {
-		id: Math.random(),
-		title: inputTitle.value,
-		description: description.value,
-		color: selectColor.value,
-		pin: false,
-		createDate: Date.now(),
+function addNewNote(title, description, color, isPinned) {
+	const note = {
+		id: Date.now(),
+		title,
+		description,
+		color,
+		pin: isPinned,
 	};
 
-	createNoteTemplate(noteData);
+	isPinned ? notes.unshift(note) : notes.push(note);
+	updateLocalStorage();
+	renderNotes();
+}
 
-	notes.push(noteData);
-	localStorage.setItem('notes', JSON.stringify(notes));
-};
+function updateNote(title, description, color, isPinned) {
+	const noteIndex = notes.findIndex((note) => note.id === editingNoteId);
+	if (noteIndex !== -1) {
+		notes[noteIndex] = { ...notes[noteIndex], title, description, color, pin: isPinned };
+		updateLocalStorage();
+		renderNotes();
+	}
+}
 
-const deleteNote = (id) => {
-	const noteToDelete = document.getElementById(id);
-
+function deleteNote(id) {
 	notes = notes.filter((note) => note.id !== id);
+	updateLocalStorage();
+	renderNotes();
+}
 
+function openEditPopup(id) {
+	const note = notes.find((note) => note.id === id);
+	if (note) {
+		openPopup('Edit Note');
+
+		isEditingMode = true;
+		editingNoteId = id;
+
+		elements.inputTitle.value = note.title;
+		elements.description.value = note.description;
+		elements.selectColor.value = note.color;
+		elements.checkbox.checked = note.pin;
+	}
+}
+
+// Utility Functions
+function updateLocalStorage() {
 	localStorage.setItem('notes', JSON.stringify(notes));
+}
 
-	noteArea.removeChild(noteToDelete);
-};
+function renderNotes() {
+	elements.noteArea.innerHTML = ''; // Clear existing notes
+	notes.forEach((note) => {
+		const noteElement = createNoteElement(note);
 
-const openEditPopup = (id) => {
-	isEditingMode = true;
+		if (note.pin) {
+			elements.noteArea.insertBefore(noteElement, elements.noteArea.firstChild);
+		} else {
+			elements.noteArea.appendChild(noteElement);
+		}
+	});
+}
 
-	openPopup();
+function createNoteElement(note) {
+	const { id, title, color, description, pin } = note;
+	const noteDiv = document.createElement('div');
 
-	editingNote = notes.find((note) => note.id === id);
+	noteDiv.className = 'note';
+	noteDiv.id = id;
+	noteDiv.style.backgroundColor = colors[color];
 
-	popupTitle.textContent = 'Edit Note';
+	noteDiv.innerHTML = `
+    <div class="note-header">
+      <h3 class="note-title">${title}</h3>
+      <div class="buttons-note">
+        ${pin ? '<i class="fa fa-thumb-tack"></i>' : ''} 
+        <button class="edit-note" onclick="openEditPopup(${id})">
+          <i class="fa fa-paint-brush"></i>		
+        </button>
+        <button class="delete-note" onclick="deleteNote(${id})">
+          <i class="fas fa-times icon"></i>
+        </button>
+      </div>
+    </div>
+    <div class="note-body">${description}</div>
+  `;
+	return noteDiv;
+}
 
-	inputTitle.value = editingNote.title;
-	description.value = editingNote.description;
-	selectColor.value = editingNote.color;
-};
-
-const createNoteTemplate = (note) => {
-	const { id, title, color, description } = note;
-
-	const newNote = document.createElement('div');
-	newNote.classList.add('note');
-	newNote.setAttribute('id', id);
-
-	newNote.innerHTML = `
-	<div class="note-header">
-	<h3 class="note-title">${title}</h3>
-	<div class="buttons-note">
-	  <button class="edit-note" onclick="openEditPopup(${id})">
-	    <i class="fa fa-paint-brush"></i>		
-	  </button>
-	  <button class="delete-note" onclick="deleteNote(${id})">
-	    <i class="fas fa-times icon"></i>
-	  </button>
-	</div>
-	</div>
-	
-	<div class="note-body">
-	${description}
-	</div>`;
-
-	newNote.style.backgroundColor = colors[color];
-
-	noteArea.appendChild(newNote);
-};
-
-const loadNotes = () => notes.forEach((note) => createNoteTemplate(note));
-
-loadNotes();
-
-addNoteBtn.addEventListener('click', addNote);
-cancel.addEventListener('click', closePopup);
-save.addEventListener('click', saveNote);
+// Initial load
+renderNotes();

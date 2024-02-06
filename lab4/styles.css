@@ -68,7 +68,7 @@ i.fa-trash {
 	left: 50%;
 	transform: translate(-50%, -50%);
 	padding: 50px;
-	height: 550px;
+	height: 600px;
 	width: 450px;
 	background-color: white;
 	border-radius: 8px;
@@ -134,23 +134,25 @@ select {
 	margin: 10px;
 	font-size: 15px;
 	border-radius: 8px;
-	box-shadow: 0px 0px 5px var(--black-color);
 	border: none;
 	transition: 0.3s;
 	cursor: pointer;
-	background-color: white;
+}
+
+.cancel {
+	background-color: red;
 }
 
 .save:hover,
 .cancel:hover {
-	box-shadow: 0px 0px 10px var(--black-color);
+	scale: 1.1;
 }
 
 .note-area {
 	display: flex;
 	align-items: start;
 	flex-wrap: wrap;
-	padding: 20px;
+	padding: 30px;
 }
 
 .note {

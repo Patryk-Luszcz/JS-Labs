@@ -19,10 +19,10 @@
 
 		<div class="popup">
 			<h1 class="add-note-title">Add Note</h1>
-			<label for="note-title">Note Title</label>
+			<label for="input-title">Note Title</label>
 			<input class="input-title" type="text" />
 			<label for="select-color">Choose Color</label>
-			<select class="select-color" onchange="selectValue()">
+			<select class="select-color">
 				<option value="0" disabled selected>- select color -</option>
 				<option value="red">Red</option>
 				<option value="green">Green</option>
@@ -32,6 +32,8 @@
 			</select>
 			<label for="description">Description</label>
 			<textarea class="description"></textarea>
+			<label for="Pin Note">Pin Note</label>
+			<input class="checkbox" type="checkbox" />
 			<p class="error">Complete all fields !</p>
 			<div class="buttons-popup">
 				<button class="cancel">Cancel</button>
