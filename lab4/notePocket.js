@@ -76,7 +76,8 @@ function saveNote() {
 
 function addNewNote(title, description, color, isPinned) {
 	const note = {
-		id: Date.now(),
+		id: Math.random(),
+		creationDate: Date.now(),
 		title,
 		description,
 		color,
@@ -122,17 +123,18 @@ function openEditPopup(id) {
 function updateLocalStorage() {
 	localStorage.setItem('notes', JSON.stringify(notes));
 }
-
 function renderNotes() {
-	elements.noteArea.innerHTML = ''; // Clear existing notes
-	notes.forEach((note) => {
-		const noteElement = createNoteElement(note);
-
-		if (note.pin) {
-			elements.noteArea.insertBefore(noteElement, elements.noteArea.firstChild);
-		} else {
-			elements.noteArea.appendChild(noteElement);
+	const sortedNotes = notes.sort((a, b) => {
+		if (a.pin === b.pin) {
+			return b.creationDate - a.creationDate;
 		}
+		return a.pin ? -1 : 1;
+	});
+
+	elements.noteArea.innerHTML = ''; // Clear existing notes
+	sortedNotes.forEach((note) => {
+		const noteElement = createNoteElement(note);
+		elements.noteArea.appendChild(noteElement);
 	});
 }
 
