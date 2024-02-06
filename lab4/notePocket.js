@@ -18,9 +18,9 @@ let editingNote;
 const colors = {
 	blue: 'rgb(0, 170, 255)',
 	red: 'rgb(255, 0, 0)',
-	green: 'rgb(0, 128, 0)',
+	green: 'rgb(173, 255, 47)',
 	orange: 'rgb(255, 165, 0)',
-	purple: 'rgb(128, 0, 128)',
+	purple: 'rgb(184, 7, 184)',
 };
 
 const openPopup = () => {
