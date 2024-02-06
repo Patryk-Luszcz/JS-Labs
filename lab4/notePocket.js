@@ -1,4 +1,4 @@
-const add = document.querySelector('.add');
+const addNoteBtn = document.querySelector('.add');
 const save = document.querySelector('.save');
 const cancel = document.querySelector('.cancel');
 const popup = document.querySelector('.popup');
@@ -7,13 +7,15 @@ const description = document.querySelector('.description');
 const error = document.querySelector('.error');
 const noteArea = document.querySelector('.note-area');
 const inputTitle = document.querySelector('.input-title');
+const popupTitle = document.querySelector('.add-note-title');
 
+let isEditingMode = false;
 let selectedColor;
-let noteID = 0;
-
 let notes = JSON.parse(localStorage.getItem('notes')) || [];
 
-let colors = {
+let editingNote;
+
+const colors = {
 	blue: 'rgb(0, 170, 255)',
 	red: 'rgb(255, 0, 0)',
 	green: 'rgb(0, 128, 0)',
@@ -26,19 +28,54 @@ const openPopup = () => {
 	popup.classList.toggle('popup-animation');
 };
 
-const cancelPopup = () => {
+const closePopup = () => {
 	popup.style.display = 'none';
 	popup.classList.toggle('popup-animation');
-	selectColor.selectedIndex = 0;
+	selectColor.selectedIndex = '0';
 	inputTitle.value = '';
 	description.value = '';
+	isEditingMode = false;
+};
+
+const addNote = () => {
+	popupTitle.textContent = 'Add Note';
+	openPopup();
+};
+
+const selectValue = () => {
+	const { options, selectedIndex } = selectColor;
+
+	selectedColor = options[selectedIndex].text.toLowerCase();
 };
 
 const saveNote = () => {
 	const { options, selectedIndex } = selectColor;
 
 	if (options[selectedIndex].value !== '0' && description.value !== '') {
-		createNote();
+		if (isEditingMode) {
+			const updatedNote = {
+				...editingNote,
+				title: inputTitle.value,
+				description: description.value,
+				color: selectedColor ?? selectColor.value,
+			};
+
+			const editingNoteHtml = document.getElementById(updatedNote.id);
+
+			const noteTitle = editingNoteHtml.querySelector('.note-title');
+			const noteBody = editingNoteHtml.querySelector('.note-body');
+
+			editingNoteHtml.style.backgroundColor = colors[updatedNote.color];
+			noteTitle.textContent = updatedNote.title;
+			noteBody.textContent = updatedNote.description;
+
+			const index = notes.findIndex((note) => note.id === updatedNote.id);
+			notes[index] = updatedNote;
+
+			localStorage.setItem('notes', JSON.stringify(notes));
+		} else {
+			createNote();
+		}
 		error.style.visibility = 'hidden';
 	} else {
 		error.style.visibility = 'visible';
@@ -50,7 +87,7 @@ const createNote = () => {
 		id: Math.random(),
 		title: inputTitle.value,
 		description: description.value,
-		color: selectedColor,
+		color: selectColor.value,
 		pin: false,
 		createDate: Date.now(),
 	};
@@ -61,23 +98,29 @@ const createNote = () => {
 	localStorage.setItem('notes', JSON.stringify(notes));
 };
 
-const selectValue = () => {
-	const { options, selectedIndex } = selectColor;
-
-	selectedColor = options[selectedIndex].text.toLowerCase();
-};
-
 const deleteNote = (id) => {
 	const noteToDelete = document.getElementById(id);
 
-	const restNotes = notes.filter((note) => note.id !== id);
+	notes = notes.filter((note) => note.id !== id);
 
-	localStorage.setItem('notes', JSON.stringify(restNotes));
+	localStorage.setItem('notes', JSON.stringify(notes));
 
 	noteArea.removeChild(noteToDelete);
 };
 
-const loadNotes = () => notes.forEach((note) => createNoteTemplate(note));
+const openEditPopup = (id) => {
+	isEditingMode = true;
+
+	openPopup();
+
+	editingNote = notes.find((note) => note.id === id);
+
+	popupTitle.textContent = 'Edit Note';
+
+	inputTitle.value = editingNote.title;
+	description.value = editingNote.description;
+	selectColor.value = editingNote.color;
+};
 
 const createNoteTemplate = (note) => {
 	const { id, title, color, description } = note;
@@ -88,17 +131,19 @@ const createNoteTemplate = (note) => {
 
 	newNote.innerHTML = `
 	<div class="note-header">
-			<h3 class="none-title">${title}</h3>
-			<button class="edit-note">
-				<i class="fa-solid fa-pen-to-square"></i>				
-			</button>
-			<button class="delete-note" onclick="deleteNote(${id})">
-					<i class="fas fa-times icon"></i>
-			</button>
+	<h3 class="note-title">${title}</h3>
+	<div class="buttons-note">
+	  <button class="edit-note" onclick="openEditPopup(${id})">
+	    <i class="fa fa-paint-brush"></i>		
+	  </button>
+	  <button class="delete-note" onclick="deleteNote(${id})">
+	    <i class="fas fa-times icon"></i>
+	  </button>
 	</div>
-
+	</div>
+	
 	<div class="note-body">
-			${description}
+	${description}
 	</div>`;
 
 	newNote.style.backgroundColor = colors[color];
@@ -106,8 +151,10 @@ const createNoteTemplate = (note) => {
 	noteArea.appendChild(newNote);
 };
 
+const loadNotes = () => notes.forEach((note) => createNoteTemplate(note));
+
 loadNotes();
 
-add.addEventListener('click', openPopup);
-cancel.addEventListener('click', cancelPopup);
+addNoteBtn.addEventListener('click', addNote);
+cancel.addEventListener('click', closePopup);
 save.addEventListener('click', saveNote);

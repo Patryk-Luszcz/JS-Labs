@@ -22,6 +22,17 @@ i.fa-sticky-note {
 	padding-right: 5px;
 }
 
+i.fa-paint-brush {
+	font-size: 16px;
+	padding: 0 5px;
+}
+
+.edit-note {
+	border: none;
+	background-color: transparent;
+	cursor: pointer;
+}
+
 .buttons {
 	position: absolute;
 	top: 3%;
@@ -79,7 +90,7 @@ i.fa-trash {
 	}
 }
 
-.add-note {
+.add-note-title {
 	text-align: center;
 }
 
