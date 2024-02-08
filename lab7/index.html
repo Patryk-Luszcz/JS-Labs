@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Pogodynka</title>
+		<!-- Include Chart.js library -->
+		<script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.3/dist/Chart.min.js"></script>
+		<link rel="stylesheet" href="style.css" />
+	</head>
+
+	<body>
+		<div class="header-wrapper">
+			<h1>Pogodynka</h1>
+			<form>
+				<label class="label" for="cityInput">Miasto:</label>
+				<input type="text" id="cityInput" placeholder="Kraków" />
+				<select id="cityList"></select>
+
+				<input type="button" id="getWeatherBtn" value="Dodaj" />
+				<input type="button" id="deleteWeatherBtn" value="Usuń" />
+			</form>
+		</div>
+
+		<div id="data"></div>
+
+		<div class="canvas-container">
+			<canvas id="weatherChart" width="340"></canvas>
+		</div>
+		<script src="weather-forecast.js"></script>
+	</body>
+</html>
