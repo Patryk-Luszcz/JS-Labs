@@ -2,8 +2,28 @@
 <html lang="en">
 	<head>
 		<meta charset="UTF-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<title>Document</title>
+		<link rel="stylesheet" href="style.css" />
+		<title>Canvas</title>
 	</head>
-	<body></body>
+	<body>
+		<div class="container">
+			<canvas id="canvas" width="1920" height="500"></canvas>
+			<br />
+			<input type="range" id="numberOfBalls" min="1" max="100" step="1" value="10" />
+			<label for="numberOfBalls">Liczba kulek:</label>
+			<output id="numberOfBallsOutput"></output>
+			<br />
+			<input type="range" id="threshold" min="1" max="50" step="1" value="20" />
+			<label for="threshold">Próg (%):</label>
+			<output id="thresholdOutput"></output>
+			<br />
+			<button id="startButton">Start</button>
+			<button id="resetButton">Reset</button>
+			<br />
+			<label id="fps"></label>
+		</div>
+		<script src="canvas.js"></script>
+	</body>
 </html>
